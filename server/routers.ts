@@ -8,6 +8,8 @@ import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
 import { runJobSearchCycle, searchForNewJobs, addJobsToDatabase, deleteExpiredJobs } from "./jobSearchService";
+import { runFullDatabaseUpdate, deleteExpiredJobs as deleteExpiredJobsFromUpdate } from "./dataUpdateService";
+import { runVerificationProcess, verifySingleFacility, getIncompleteFacilities } from "./facilityVerificationService";
 import { sendWhatsAppNotification, getWhatsAppLink } from "./whatsappService";
 
 // Admin procedure - only allows admin users
@@ -519,6 +521,38 @@ ${jobsList || 'لا توجد وظائف مطابقة حالياً'}
     deleteExpired: adminProcedure.mutation(async () => {
       const deleted = await deleteExpiredJobs();
       return { deleted };
+    }),
+  }),
+
+  // Data Update Service (Admin only)
+  dataUpdate: router({
+    // تحديث قاعدة البيانات بالكامل
+    runFull: adminProcedure.mutation(async () => {
+      const result = await runFullDatabaseUpdate();
+      return result;
+    }),
+  }),
+
+  // Facility Verification Service (Admin only)
+  verification: router({
+    // تشغيل عملية التحقق الكاملة
+    runProcess: adminProcedure.mutation(async () => {
+      const result = await runVerificationProcess();
+      return result;
+    }),
+
+    // التحقق من منشأة واحدة
+    verifySingle: adminProcedure
+      .input(z.object({ facilityId: z.number() }))
+      .mutation(async ({ input }) => {
+        const success = await verifySingleFacility(input.facilityId);
+        return { success };
+      }),
+
+    // الحصول على المنشآت غير المكتملة
+    getIncomplete: adminProcedure.query(async () => {
+      const facilities = await getIncompleteFacilities();
+      return facilities;
     }),
   }),
 });
