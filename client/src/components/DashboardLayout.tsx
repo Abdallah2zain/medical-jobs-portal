@@ -21,21 +21,23 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, Building2, Briefcase, FileText, LogOut, PanelLeft, Stethoscope } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: LayoutDashboard, label: "لوحة التحكم", path: "/admin" },
+  { icon: Building2, label: "المنشآت الطبية", path: "/admin/facilities" },
+  { icon: Briefcase, label: "الوظائف", path: "/admin/jobs" },
+  { icon: FileText, label: "طلبات التوظيف", path: "/admin/applications" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
-const DEFAULT_WIDTH = 280;
+const DEFAULT_WIDTH = 260;
 const MIN_WIDTH = 200;
-const MAX_WIDTH = 480;
+const MAX_WIDTH = 400;
 
 export default function DashboardLayout({
   children,
@@ -58,14 +60,17 @@ export default function DashboardLayout({
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Sign in to continue
+            <div className="h-16 w-16 rounded-2xl gradient-medical flex items-center justify-center">
+              <Stethoscope className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-center">
+              لوحة تحكم بوابة التوظيف الطبي
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Access to this dashboard requires authentication. Continue to launch the login flow.
+              يرجى تسجيل الدخول للوصول إلى لوحة التحكم الإدارية
             </p>
           </div>
           <Button
@@ -75,7 +80,22 @@ export default function DashboardLayout({
             size="lg"
             className="w-full shadow-lg hover:shadow-xl transition-all"
           >
-            Sign in
+            تسجيل الدخول
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user is admin
+  if (user.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-destructive mb-4">غير مصرح</h1>
+          <p className="text-muted-foreground mb-4">ليس لديك صلاحية الوصول لهذه الصفحة</p>
+          <Button variant="outline" onClick={() => window.location.href = '/'}>
+            العودة للصفحة الرئيسية
           </Button>
         </div>
       </div>
@@ -112,7 +132,7 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
+  const activeMenuItem = menuItems.find(item => location.startsWith(item.path) && (item.path === '/admin' ? location === '/admin' : true)) || menuItems[0];
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -125,8 +145,8 @@ function DashboardLayoutContent({
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
 
-      const sidebarLeft = sidebarRef.current?.getBoundingClientRect().left ?? 0;
-      const newWidth = e.clientX - sidebarLeft;
+      const sidebarRight = sidebarRef.current?.getBoundingClientRect().right ?? 0;
+      const newWidth = sidebarRight - e.clientX;
       if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
         setSidebarWidth(newWidth);
       }
@@ -153,35 +173,65 @@ function DashboardLayoutContent({
 
   return (
     <>
+      <SidebarInset>
+        {isMobile && (
+          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="tracking-tight text-foreground">
+                    {activeMenuItem?.label ?? "القائمة"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <main className="flex-1 p-4 md:p-6">{children}</main>
+      </SidebarInset>
+
       <div className="relative" ref={sidebarRef}>
+        <div
+          className={`absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
+          onMouseDown={() => {
+            if (isCollapsed) return;
+            setIsResizing(true);
+          }}
+          style={{ zIndex: 50 }}
+        />
         <Sidebar
           collapsible="icon"
-          className="border-r-0"
+          className="border-l-0 border-r"
+          side="right"
           disableTransition={isResizing}
         >
           <SidebarHeader className="h-16 justify-center">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
-              <button
-                onClick={toggleSidebar}
-                className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-                aria-label="Toggle navigation"
-              >
-                <PanelLeft className="h-4 w-4 text-muted-foreground" />
-              </button>
               {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    Navigation
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="h-9 w-9 rounded-lg gradient-medical flex items-center justify-center shrink-0">
+                    <Stethoscope className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="font-bold tracking-tight truncate">
+                    لوحة التحكم
                   </span>
                 </div>
               ) : null}
+              <button
+                onClick={toggleSidebar}
+                className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                aria-label="تبديل القائمة"
+              >
+                <PanelLeft className="h-4 w-4 text-muted-foreground" />
+              </button>
             </div>
           </SidebarHeader>
 
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
               {menuItems.map(item => {
-                const isActive = location === item.path;
+                const isActive = location.startsWith(item.path) && (item.path === '/admin' ? location === '/admin' : true);
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
@@ -204,7 +254,7 @@ function DashboardLayoutContent({
           <SidebarFooter className="p-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-right group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar className="h-9 w-9 border shrink-0">
                     <AvatarFallback className="text-xs font-medium">
                       {user?.name?.charAt(0).toUpperCase()}
@@ -222,43 +272,23 @@ function DashboardLayoutContent({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
+                  onClick={() => window.location.href = '/'}
+                  className="cursor-pointer"
+                >
+                  العودة للموقع
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <LogOut className="ml-2 h-4 w-4" />
+                  <span>تسجيل الخروج</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarFooter>
         </Sidebar>
-        <div
-          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-primary/20 transition-colors ${isCollapsed ? "hidden" : ""}`}
-          onMouseDown={() => {
-            if (isCollapsed) return;
-            setIsResizing(true);
-          }}
-          style={{ zIndex: 50 }}
-        />
       </div>
-
-      <SidebarInset>
-        {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-9 w-9 rounded-lg bg-background" />
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col gap-1">
-                  <span className="tracking-tight text-foreground">
-                    {activeMenuItem?.label ?? "Menu"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        <main className="flex-1 p-4">{children}</main>
-      </SidebarInset>
     </>
   );
 }
