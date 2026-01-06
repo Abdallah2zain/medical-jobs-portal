@@ -1,0 +1,244 @@
+{
+  "facilities": [
+    {
+      "name": "مستشفيات الحمادي",
+      "nameEn": "Al Hammadi Hospitals",
+      "type": "hospital",
+      "city": "الرياض",
+      "address": "السويدي العام، السويدي، الرياض",
+      "phone": "+966114977777",
+      "website": "https://alhammadi.med.sa",
+      "googleMapsUrl": "https://maps.google.com/?q=Al+Hammadi+Hospital+Al-Suwaidi",
+      "latitude": 24.6167,
+      "longitude": 46.6833,
+      "socialMedia": {
+        "linkedin": "https://linkedin.com/company/alhammadi",
+        "twitter": "https://twitter.com/alhammadi",
+        "facebook": "https://facebook.com/alhammadi"
+      },
+      "workingHours": "09:00 - 17:00",
+      "workingDays": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"],
+      "description": "تأسست مجموعة مستشفيات الحمادي عام 1985 في الرياض، المملكة العربية السعودية، وهي رائدة في تقديم الرعاية الطبية الشاملة.",
+      "verificationStatus": "verified",
+      "googleRating": 3.1,
+      "googleReviews": 2518
+    },
+    {
+      "name": "مستشفى الدكتور عبدالرحمن المشاري",
+      "nameEn": "Dr. Abdulrahman Al-Mishari Hospital",
+      "type": "hospital",
+      "city": "الرياض",
+      "address": "العليا، الرياض، المملكة العربية السعودية",
+      "phone": "+966920011066",
+      "website": "https://al-mishari.com.sa/",
+      "googleMapsUrl": "https://maps.google.com/?q=Dr+Abdulrahman+Al-Mishari+Hospital",
+      "latitude": 24.6917,
+      "longitude": 46.6850,
+      "socialMedia": {},
+      "workingHours": "09:00 - 17:00",
+      "workingDays": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"],
+      "description": "مستشفى الدكتور عبد الرحمن المشاري (AMH) هو مستشفى عام خاص يقع في حي العليا، الرياض. حصل المستشفى على اعتماد الماس من هيئة الاعتماد الكندية. على مدار 36 عاماً يقدم رعاية طبية عالية الجودة.",
+      "verificationStatus": "verified",
+      "googleRating": 3.3,
+      "googleReviews": 2107
+    },
+    {
+      "name": "مستشفى دله",
+      "nameEn": "Dallah Hospital",
+      "type": "hospital",
+      "city": "الرياض",
+      "address": "المملكة العربية السعودية، الرياض",
+      "phone": "920012222",
+      "website": "https://www.dallah-hospital.com",
+      "email": "info@dallah-hospital.com",
+      "googleMapsUrl": "https://maps.google.com/?q=Dallah+Hospital+Riyadh",
+      "latitude": 24.7500,
+      "longitude": 46.6500,
+      "socialMedia": {},
+      "workingHours": "24/7",
+      "workingDays": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+      "description": "مستشفيات دله مجموعة رائدة في الرعاية الصحية بالسعودية. لديها فروع في الرياض (نمار، النخيل) والخبر والأحساء. تقدم خدمات طبية شاملة ورعاية منزلية وسياحة علاجية.",
+      "verificationStatus": "verified",
+      "branches": [
+        {
+          "name": "دله نمار",
+          "city": "الرياض"
+        },
+        {
+          "name": "دله النخيل",
+          "city": "الرياض"
+        },
+        {
+          "name": "دله الخبر",
+          "city": "الخبر"
+        },
+        {
+          "name": "دله الأحساء",
+          "city": "الأحساء"
+        }
+      ]
+    },
+    {
+      "name": "مستشفى الدكتور سليمان الحبيب",
+      "nameEn": "Dr. Sulaiman Al Habib Hospital",
+      "type": "hospital",
+      "city": "الرياض",
+      "address": "الرياض، المملكة العربية السعودية",
+      "phone": "+966115259999",
+      "website": "https://hmg.com",
+      "googleMapsUrl": "https://maps.google.com/?q=Dr+Sulaiman+Al+Habib+Hospital",
+      "latitude": 24.7136,
+      "longitude": 46.6753,
+      "socialMedia": {},
+      "workingHours": "24/7",
+      "workingDays": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+      "description": "مجموعة مستشفيات الدكتور سليمان الحبيب من أكبر المجموعات الطبية الخاصة في الشرق الأوسط. تقدم خدمات طبية متكاملة عبر فروعها المتعددة.",
+      "verificationStatus": "verified"
+    },
+    {
+      "name": "المستشفى السعودي الألماني - جدة",
+      "nameEn": "Saudi German Hospital - Jeddah",
+      "type": "hospital",
+      "city": "جدة",
+      "address": "حي الزهراء، شارع البترجي، جدة",
+      "phone": "920007997",
+      "website": "https://jeddah.saudigermanhealth.com",
+      "googleMapsUrl": "https://maps.google.com/?q=Saudi+German+Hospital+Jeddah",
+      "latitude": 21.5433,
+      "longitude": 39.1728,
+      "socialMedia": {
+        "instagram": "https://instagram.com/sghjeddah"
+      },
+      "workingHours": "24/7",
+      "workingDays": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+      "description": "يقع المستشفى في شارع بترجي في منطقة رئيسية في حي الزهراء في جدة، على بعد بضعة كيلومترات من مطار الملك عبدالعزيز الدولي. يقدم خدمات طبية بأعلى المعايير الدولية.",
+      "verificationStatus": "verified"
+    },
+    {
+      "name": "مستشفى المانع - الخبر",
+      "nameEn": "Almana Hospital - Khobar",
+      "type": "hospital",
+      "city": "الخبر",
+      "address": "شارع الأمير طلال، حي الخبر الشمالية، الخبر 34425",
+      "phone": "920033440",
+      "website": "https://www.almanahospital.com.sa",
+      "googleMapsUrl": "https://maps.google.com/?q=Almana+Hospital+Khobar",
+      "latitude": 26.2172,
+      "longitude": 50.1971,
+      "socialMedia": {
+        "facebook": "https://facebook.com/AlmanaHospitals",
+        "instagram": "https://instagram.com/almanahospitals"
+      },
+      "workingHours": "24/7",
+      "workingDays": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+      "description": "مستشفى المانع العام بالخبر، مجمع طبي شامل مكرس لتقديم خدمات رعاية صحية استثنائية. يضم 250 سريراً وفريق طبي ماهر وتكنولوجيا متقدمة.",
+      "verificationStatus": "verified"
+    },
+    {
+      "name": "مستشفى الملك فهد للقوات المسلحة - جدة",
+      "nameEn": "King Fahd Armed Forces Hospital - Jeddah",
+      "type": "hospital",
+      "city": "جدة",
+      "address": "طريق الكورنيش، حي الأندلس، جدة 23311",
+      "phone": "+966122328888",
+      "website": "https://kfafh.med.sa",
+      "googleMapsUrl": "https://maps.google.com/?q=King+Fahd+Armed+Forces+Hospital+Jeddah",
+      "latitude": 21.5169,
+      "longitude": 39.1653,
+      "socialMedia": {},
+      "workingHours": "24/7",
+      "workingDays": ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"],
+      "description": "مستشفى الملك فهد للقوات المسلحة بجدة من أكبر المستشفيات الحكومية في المنطقة الغربية.",
+      "verificationStatus": "verified"
+    },
+    {
+      "name": "مستشفى الملك فيصل التخصصي ومركز الأبحاث",
+      "nameEn": "King Faisal Specialist Hospital & Research Centre",
+      "type": "hospital",
+      "city": "الرياض",
+      "address": "الرياض، المملكة العربية السعودية",
+      "phone": "+966114647272",
+      "website": "https://www.kfshrc.edu.sa",
+      "googleMapsUrl": "https://maps.google.com/?q=King+Faisal+Specialist+Hospital+Riyadh",
+      "latitude": 24.6689,
+      "longitude": 46.6753,
+      "socialMedia": {
+        "facebook": "https://facebook.com/kfshrc"
+      },
+      "workingHours": "24/7",
+      "description": "مستشفى الملك فيصل التخصصي ومركز الأبحاث من أكبر المستشفيات التخصصية في الشرق الأوسط. يقدم رعاية صحية متقدمة في بيئة تعليمية وبحثية متكاملة.",
+      "verificationStatus": "verified"
+    },
+    {
+      "name": "مستشفى مركز مكة الطبي",
+      "nameEn": "Mecca Medical Center Hospital",
+      "type": "hospital",
+      "city": "مكة المكرمة",
+      "address": "حي العمرة، مكة المكرمة",
+      "phone": "0125222222",
+      "email": "info@mmc.med.sa",
+      "website": "https://mmc.med.sa",
+      "googleMapsUrl": "https://maps.google.com/?q=Mecca+Medical+Center",
+      "latitude": 21.4225,
+      "longitude": 39.8262,
+      "socialMedia": {
+        "facebook": "https://facebook.com/mmc.med.sa",
+        "twitter": "mmc_med_sa",
+        "snapchat": "mmcofficial1"
+      },
+      "workingHours": "24/7",
+      "description": "مركز مكة الطبي من المنشآت الصحية المتكاملة الرائدة في منطقة مكة المكرمة، يقدم خدمات طبية شاملة بجودة عالية.",
+      "verificationStatus": "verified"
+    },
+    {
+      "name": "مستشفى المدينة الوطني",
+      "nameEn": "Madina National Hospital",
+      "type": "hospital",
+      "city": "المدينة المنورة",
+      "address": "المدينة المنورة، المملكة العربية السعودية",
+      "phone": "0148444444",
+      "website": "https://instagram.com/madinanationalhospital",
+      "googleMapsUrl": "https://maps.google.com/?q=Madina+National+Hospital",
+      "latitude": 24.4672,
+      "longitude": 39.6024,
+      "socialMedia": {
+        "instagram": "https://instagram.com/madinanationalhospital"
+      },
+      "workingHours": "09:00-12:00, 17:00-21:00",
+      "description": "أول مستشفى خاص تم افتتاحه بالمدينة المنورة.",
+      "verificationStatus": "verified"
+    },
+    {
+      "name": "مجمع المجد الحديث الطبي",
+      "nameEn": "Al Majd Modern Medical Complex",
+      "type": "complex",
+      "city": "مكة المكرمة",
+      "address": "مكة المكرمة",
+      "phone": "",
+      "website": "https://almajdpolyclinic.com",
+      "googleMapsUrl": "https://maps.google.com/?q=Al+Majd+Medical+Complex+Mecca",
+      "latitude": 21.4225,
+      "longitude": 39.8262,
+      "socialMedia": {},
+      "workingHours": "09:00-12:00, 17:00-22:00",
+      "description": "مجمع المجد الحديث الطبي العام في مكة المكرمة.",
+      "verificationStatus": "pending"
+    },
+    {
+      "name": "مجمع الرقي العام الطبي",
+      "nameEn": "Al Raqi General Medical Complex",
+      "type": "complex",
+      "city": "مكة المكرمة",
+      "address": "قلب مدينة مكة المكرمة",
+      "phone": "",
+      "website": "https://rmclinic.sa",
+      "googleMapsUrl": "https://maps.google.com/?q=Al+Raqi+Medical+Complex+Mecca",
+      "latitude": 21.4225,
+      "longitude": 39.8262,
+      "socialMedia": {},
+      "workingHours": "24/7",
+      "description": "مجمع الرقي العام الطبي مركز طبي متكامل يقع في قلب مدينة مكة المكرمة، مصمم لتلبية الاحتياجات الصحية بأعلى معايير الجودة.",
+      "verificationStatus": "pending"
+    }
+  ]
+}

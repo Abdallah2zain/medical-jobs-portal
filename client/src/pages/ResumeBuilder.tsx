@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,25 +29,31 @@ import {
   Palette,
   Type,
   FileText,
+  Image,
+  Loader2,
+  Upload,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
+// الخطوط المتاحة
 const fonts = [
-  { value: "Tajawal", label: "تجوال" },
-  { value: "Cairo", label: "القاهرة" },
-  { value: "Amiri", label: "أميري" },
-  { value: "Noto Sans Arabic", label: "نوتو سانس" },
-  { value: "Inter", label: "Inter" },
-  { value: "Roboto", label: "Roboto" },
+  { value: "Tajawal", label: "تجوال", labelEn: "Tajawal" },
+  { value: "Cairo", label: "القاهرة", labelEn: "Cairo" },
+  { value: "Amiri", label: "أميري", labelEn: "Amiri" },
+  { value: "Noto Sans Arabic", label: "نوتو سانس", labelEn: "Noto Sans" },
+  { value: "Inter", label: "Inter", labelEn: "Inter" },
+  { value: "Roboto", label: "Roboto", labelEn: "Roboto" },
 ];
 
 const fontSizes = [
+  { value: "10", label: "10px" },
+  { value: "11", label: "11px" },
   { value: "12", label: "12px" },
   { value: "14", label: "14px" },
   { value: "16", label: "16px" },
   { value: "18", label: "18px" },
-  { value: "20", label: "20px" },
-  { value: "24", label: "24px" },
 ];
 
 const defaultColors = [
@@ -59,6 +65,160 @@ const defaultColors = [
   "#d97706", // amber
   "#374151", // gray
 ];
+
+// الترجمات
+const translations = {
+  ar: {
+    back: "العودة",
+    createResume: "إنشاء السيرة الذاتية",
+    personal: "شخصي",
+    experience: "الخبرات",
+    education: "التعليم",
+    skills: "المهارات",
+    languages: "اللغات",
+    style: "التنسيق",
+    personalInfo: "البيانات الشخصية",
+    fullName: "الاسم الكامل",
+    phone: "رقم الهاتف",
+    email: "البريد الإلكتروني",
+    address: "العنوان",
+    photoUrl: "رابط الصورة الشخصية",
+    professionalInfo: "البيانات المهنية",
+    mumaresNumber: "رقم ممارس",
+    dataflowNumber: "رقم Dataflow",
+    iqamaNumber: "رقم الإقامة",
+    entryDate: "تاريخ الدخول",
+    summary: "النبذة الشخصية",
+    suggestWithAI: "اقتراح بالذكاء الاصطناعي",
+    workExperience: "الخبرات العملية",
+    addExperience: "إضافة خبرة",
+    jobTitle: "المسمى الوظيفي",
+    company: "جهة العمل",
+    startDate: "تاريخ البدء",
+    endDate: "تاريخ الانتهاء",
+    currentJob: "وظيفة حالية",
+    description: "الوصف",
+    educationTitle: "التعليم والشهادات",
+    addEducation: "إضافة شهادة",
+    degree: "الدرجة العلمية",
+    institution: "المؤسسة التعليمية",
+    year: "السنة",
+    coursesTitle: "الدورات التدريبية",
+    addCourse: "إضافة دورة",
+    courseName: "اسم الدورة",
+    skillsTitle: "المهارات",
+    addSkill: "إضافة مهارة",
+    suggestSkills: "اقتراح مهارات",
+    languagesTitle: "اللغات",
+    addLanguage: "إضافة لغة",
+    language: "اللغة",
+    level: "المستوى",
+    native: "لغة أم",
+    fluent: "طلاقة",
+    advanced: "متقدم",
+    intermediate: "متوسط",
+    basic: "مبتدئ",
+    styleTitle: "تنسيق السيرة الذاتية",
+    mainHeadings: "العناوين الرئيسية",
+    bodyText: "النص الأساسي",
+    font: "الخط",
+    size: "الحجم",
+    color: "اللون",
+    preview: "المعاينة",
+    downloadPDF: "تحميل PDF",
+    downloadImage: "تحميل صورة",
+    contactInfo: "معلومات التواصل",
+    professionalData: "بيانات مهنية",
+    present: "حتى الآن",
+    noExperience: "لم تتم إضافة خبرات بعد",
+    noEducation: "لم تتم إضافة شهادات بعد",
+    noCourses: "لم تتم إضافة دورات بعد",
+    noSkills: "لم تتم إضافة مهارات بعد",
+    noLanguages: "لم تتم إضافة لغات بعد",
+    placeholderName: "الاسم الكامل",
+    placeholderPhone: "+966 5x xxx xxxx",
+    placeholderEmail: "email@example.com",
+    placeholderAddress: "الرياض، المملكة العربية السعودية",
+    downloading: "جاري التحميل...",
+    downloadSuccess: "تم التحميل بنجاح",
+    downloadError: "حدث خطأ أثناء التحميل",
+  },
+  en: {
+    back: "Back",
+    createResume: "Create Resume",
+    personal: "Personal",
+    experience: "Experience",
+    education: "Education",
+    skills: "Skills",
+    languages: "Languages",
+    style: "Style",
+    personalInfo: "Personal Information",
+    fullName: "Full Name",
+    phone: "Phone Number",
+    email: "Email Address",
+    address: "Address",
+    photoUrl: "Photo URL",
+    professionalInfo: "Professional Information",
+    mumaresNumber: "Mumares Number",
+    dataflowNumber: "Dataflow Number",
+    iqamaNumber: "Iqama Number",
+    entryDate: "Entry Date",
+    summary: "Summary",
+    suggestWithAI: "Suggest with AI",
+    workExperience: "Work Experience",
+    addExperience: "Add Experience",
+    jobTitle: "Job Title",
+    company: "Company",
+    startDate: "Start Date",
+    endDate: "End Date",
+    currentJob: "Current Job",
+    description: "Description",
+    educationTitle: "Education",
+    addEducation: "Add Education",
+    degree: "Degree",
+    institution: "Institution",
+    year: "Year",
+    coursesTitle: "Courses & Training",
+    addCourse: "Add Course",
+    courseName: "Course Name",
+    skillsTitle: "Skills",
+    addSkill: "Add Skill",
+    suggestSkills: "Suggest Skills",
+    languagesTitle: "Languages",
+    addLanguage: "Add Language",
+    language: "Language",
+    level: "Level",
+    native: "Native",
+    fluent: "Fluent",
+    advanced: "Advanced",
+    intermediate: "Intermediate",
+    basic: "Basic",
+    styleTitle: "Resume Style",
+    mainHeadings: "Main Headings",
+    bodyText: "Body Text",
+    font: "Font",
+    size: "Size",
+    color: "Color",
+    preview: "Preview",
+    downloadPDF: "Download PDF",
+    downloadImage: "Download Image",
+    contactInfo: "Contact Information",
+    professionalData: "Professional Data",
+    present: "Present",
+    noExperience: "No experience added yet",
+    noEducation: "No education added yet",
+    noCourses: "No courses added yet",
+    noSkills: "No skills added yet",
+    noLanguages: "No languages added yet",
+    placeholderName: "Full Name",
+    placeholderPhone: "+966 5x xxx xxxx",
+    placeholderEmail: "email@example.com",
+    placeholderAddress: "Riyadh, Saudi Arabia",
+    downloading: "Downloading...",
+    downloadSuccess: "Downloaded successfully",
+    downloadError: "Error downloading",
+  },
+};
 
 interface Education {
   degree: string;
@@ -82,7 +242,7 @@ interface Course {
   year: string;
 }
 
-interface Language {
+interface LanguageItem {
   language: string;
   level: string;
 }
@@ -91,7 +251,11 @@ export default function ResumeBuilder() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("personal");
   const [language, setLanguage] = useState<"ar" | "en">("ar");
+  const [isDownloading, setIsDownloading] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // الحصول على الترجمات
+  const t = translations[language];
 
   // Form state
   const [formData, setFormData] = useState({
@@ -110,13 +274,13 @@ export default function ResumeBuilder() {
   // Style state
   const [styles, setStyles] = useState({
     headingFont: "Tajawal",
-    headingSize: 20,
+    headingSize: 14,
     headingColor: "#0d9488",
     subheadingFont: "Tajawal",
-    subheadingSize: 14,
+    subheadingSize: 12,
     subheadingColor: "#374151",
     bodyFont: "Tajawal",
-    bodySize: 12,
+    bodySize: 10,
     bodyColor: "#4b5563",
   });
 
@@ -125,32 +289,32 @@ export default function ResumeBuilder() {
   const [experience, setExperience] = useState<Experience[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
-  const [languages, setLanguages] = useState<Language[]>([]);
+  const [languagesList, setLanguagesList] = useState<LanguageItem[]>([]);
   const [newSkill, setNewSkill] = useState("");
 
   // AI Suggestions
   const suggestSummaryMutation = trpc.ai.suggestSummary.useMutation({
     onSuccess: (data) => {
       setFormData({ ...formData, summary: data.suggestion });
-      toast.success("تم إنشاء النبذة الشخصية");
+      toast.success(language === "ar" ? "تم إنشاء النبذة الشخصية" : "Summary generated");
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء إنشاء النبذة");
+      toast.error(language === "ar" ? "حدث خطأ أثناء إنشاء النبذة" : "Error generating summary");
     },
   });
 
   const suggestSkillsMutation = trpc.ai.suggestSkills.useMutation({
     onSuccess: (data) => {
       setSkills([...skills, ...data.skills.filter((s) => !skills.includes(s))]);
-      toast.success("تم إضافة المهارات المقترحة");
+      toast.success(language === "ar" ? "تم إضافة المهارات المقترحة" : "Skills added");
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء اقتراح المهارات");
+      toast.error(language === "ar" ? "حدث خطأ أثناء اقتراح المهارات" : "Error suggesting skills");
     },
   });
 
   const handleSuggestSummary = () => {
-    const jobTitle = experience[0]?.title || "ممارس صحي";
+    const jobTitle = experience[0]?.title || (language === "ar" ? "ممارس صحي" : "Healthcare Professional");
     suggestSummaryMutation.mutate({
       jobTitle,
       experience: experience.map((e) => e.title).join(", "),
@@ -159,8 +323,126 @@ export default function ResumeBuilder() {
   };
 
   const handleSuggestSkills = () => {
-    const jobTitle = experience[0]?.title || "ممارس صحي";
+    const jobTitle = experience[0]?.title || (language === "ar" ? "ممارس صحي" : "Healthcare Professional");
     suggestSkillsMutation.mutate({ jobTitle, language });
+  };
+
+  // تحميل PDF - طريقة الطباعة
+  const handleDownloadPDF = () => {
+    if (!previewRef.current) return;
+    
+    setIsDownloading(true);
+    toast.info(language === 'ar' ? 'جاري فتح نافذة الطباعة...' : 'Opening print dialog...');
+    
+    try {
+      // إنشاء نافذة طباعة جديدة
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
+      if (!printWindow) {
+        toast.error(language === 'ar' ? 'يرجى السماح بالنوافذ المنبثقة' : 'Please allow popups');
+        setIsDownloading(false);
+        return;
+      }
+      
+      const content = previewRef.current.innerHTML;
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="${isRTL ? 'rtl' : 'ltr'}" lang="${language}">
+        <head>
+          <meta charset="UTF-8">
+          <title>${formData.fullName || 'CV'} - Resume</title>
+          <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Cairo:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            @page { size: A4; margin: 0; }
+            html, body { 
+              width: 210mm; 
+              min-height: 297mm; 
+              font-family: 'Tajawal', sans-serif;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            body { background: white; }
+            .resume-container { 
+              width: 210mm; 
+              min-height: 297mm; 
+              margin: 0 auto;
+              background: white;
+            }
+            @media print {
+              html, body { width: 210mm; height: 297mm; }
+              .resume-container { width: 100%; height: 100%; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="resume-container">
+            ${content}
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      toast.success(language === 'ar' ? 'اختر حفظ كـ PDF من نافذة الطباعة' : 'Select Save as PDF from print dialog');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(t.downloadError);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // تحميل صورة
+  const handleDownloadImage = async () => {
+    if (!previewRef.current) return;
+    
+    setIsDownloading(true);
+    toast.info(language === 'ar' ? 'جاري إنشاء الصورة...' : 'Generating image...');
+    
+    try {
+      const element = previewRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+      
+      // تحويل إلى blob وتحميل
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${formData.fullName || 'CV'}_Resume.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          toast.success(t.downloadSuccess);
+        } else {
+          toast.error(t.downloadError);
+        }
+      }, 'image/png', 1.0);
+    } catch (error) {
+      console.error('Error generating image:', error);
+      toast.error(t.downloadError);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const addEducation = () => {
@@ -176,7 +458,7 @@ export default function ResumeBuilder() {
   };
 
   const addLanguage = () => {
-    setLanguages([...languages, { language: "", level: "" }]);
+    setLanguagesList([...languagesList, { language: "", level: "" }]);
   };
 
   const addSkill = () => {
@@ -188,16 +470,28 @@ export default function ResumeBuilder() {
 
   const isRTL = language === "ar";
 
+  // ترجمة مستوى اللغة
+  const getLevelText = (level: string) => {
+    const levels: Record<string, { ar: string; en: string }> = {
+      native: { ar: "لغة أم", en: "Native" },
+      fluent: { ar: "طلاقة", en: "Fluent" },
+      advanced: { ar: "متقدم", en: "Advanced" },
+      intermediate: { ar: "متوسط", en: "Intermediate" },
+      basic: { ar: "مبتدئ", en: "Basic" },
+    };
+    return levels[level]?.[language] || level;
+  };
+
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30" dir={isRTL ? "rtl" : "ltr"}>
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-50">
         <div className="container flex items-center justify-between h-16">
           <Button variant="ghost" onClick={() => setLocation("/")} className="gap-2">
-            <ArrowRight className="h-4 w-4" />
-            العودة
+            <ArrowRight className={`h-4 w-4 ${!isRTL ? "rotate-180" : ""}`} />
+            {t.back}
           </Button>
-          <h1 className="font-bold text-lg">إنشاء السيرة الذاتية</h1>
+          <h1 className="font-bold text-lg">{t.createResume}</h1>
           <div className="flex items-center gap-2">
             <Select value={language} onValueChange={(v) => setLanguage(v as "ar" | "en")}>
               <SelectTrigger className="w-28">
@@ -220,27 +514,27 @@ export default function ResumeBuilder() {
               <TabsList className="grid grid-cols-6 w-full">
                 <TabsTrigger value="personal" className="gap-1">
                   <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">شخصي</span>
+                  <span className="hidden sm:inline">{t.personal}</span>
                 </TabsTrigger>
                 <TabsTrigger value="experience" className="gap-1">
                   <Briefcase className="h-4 w-4" />
-                  <span className="hidden sm:inline">الخبرات</span>
+                  <span className="hidden sm:inline">{t.experience}</span>
                 </TabsTrigger>
                 <TabsTrigger value="education" className="gap-1">
                   <GraduationCap className="h-4 w-4" />
-                  <span className="hidden sm:inline">التعليم</span>
+                  <span className="hidden sm:inline">{t.education}</span>
                 </TabsTrigger>
                 <TabsTrigger value="skills" className="gap-1">
                   <Award className="h-4 w-4" />
-                  <span className="hidden sm:inline">المهارات</span>
+                  <span className="hidden sm:inline">{t.skills}</span>
                 </TabsTrigger>
                 <TabsTrigger value="languages" className="gap-1">
                   <Languages className="h-4 w-4" />
-                  <span className="hidden sm:inline">اللغات</span>
+                  <span className="hidden sm:inline">{t.languages}</span>
                 </TabsTrigger>
                 <TabsTrigger value="style" className="gap-1">
                   <Palette className="h-4 w-4" />
-                  <span className="hidden sm:inline">التنسيق</span>
+                  <span className="hidden sm:inline">{t.style}</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -250,61 +544,97 @@ export default function ResumeBuilder() {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <User className="h-5 w-5" />
-                      البيانات الشخصية
+                      {t.personalInfo}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2 space-y-2">
-                        <Label>الاسم الكامل</Label>
+                        <Label>{t.fullName}</Label>
                         <Input
                           value={formData.fullName}
                           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                          placeholder={language === "ar" ? "محمد أحمد العلي" : "John Doe"}
+                          placeholder={t.placeholderName}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>رقم الهاتف</Label>
+                        <Label>{t.phone}</Label>
                         <Input
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="+966 5x xxx xxxx"
+                          placeholder={t.placeholderPhone}
                           dir="ltr"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>البريد الإلكتروني</Label>
+                        <Label>{t.email}</Label>
                         <Input
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          placeholder="email@example.com"
+                          placeholder={t.placeholderEmail}
                           dir="ltr"
                         />
                       </div>
                       <div className="col-span-2 space-y-2">
-                        <Label>العنوان</Label>
+                        <Label>{t.address}</Label>
                         <Input
                           value={formData.address}
                           onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                          placeholder={language === "ar" ? "الرياض، المملكة العربية السعودية" : "Riyadh, Saudi Arabia"}
+                          placeholder={t.placeholderAddress}
                         />
                       </div>
                       <div className="col-span-2 space-y-2">
-                        <Label>رابط الصورة الشخصية</Label>
-                        <Input
-                          value={formData.photoUrl}
-                          onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
-                          placeholder="https://..."
-                          dir="ltr"
-                        />
+                        <Label>{t.photoUrl}</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={formData.photoUrl}
+                            onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
+                            placeholder="https://..."
+                            dir="ltr"
+                            className="flex-1"
+                          />
+                          <label className="cursor-pointer">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onload = (event) => {
+                                    const result = event.target?.result as string;
+                                    setFormData({ ...formData, photoUrl: result });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                            <Button type="button" variant="outline" asChild>
+                              <span className="flex items-center gap-1">
+                                <Upload className="h-4 w-4" />
+                                {language === 'ar' ? 'رفع صورة' : 'Upload'}
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                        {formData.photoUrl && formData.photoUrl.startsWith('data:') && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <img src={formData.photoUrl} alt="Preview" className="w-12 h-12 rounded-full object-cover" />
+                            <span className="text-sm text-muted-foreground">
+                              {language === 'ar' ? 'تم رفع الصورة' : 'Image uploaded'}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="border-t pt-4">
-                      <h4 className="font-medium mb-3">بيانات مهنية (للممارسين الصحيين)</h4>
+                    {/* Professional Info */}
+                    <div className="border-t pt-4 mt-4">
+                      <h4 className="font-medium mb-3">{t.professionalInfo}</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>رقم ممارس</Label>
+                          <Label>{t.mumaresNumber}</Label>
                           <Input
                             value={formData.mumaresNumber}
                             onChange={(e) => setFormData({ ...formData, mumaresNumber: e.target.value })}
@@ -312,7 +642,7 @@ export default function ResumeBuilder() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>رقم Dataflow</Label>
+                          <Label>{t.dataflowNumber}</Label>
                           <Input
                             value={formData.dataflowNumber}
                             onChange={(e) => setFormData({ ...formData, dataflowNumber: e.target.value })}
@@ -320,7 +650,7 @@ export default function ResumeBuilder() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>رقم الإقامة</Label>
+                          <Label>{t.iqamaNumber}</Label>
                           <Input
                             value={formData.iqamaNumber}
                             onChange={(e) => setFormData({ ...formData, iqamaNumber: e.target.value })}
@@ -328,7 +658,7 @@ export default function ResumeBuilder() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>تاريخ الدخول</Label>
+                          <Label>{t.entryDate}</Label>
                           <Input
                             type="date"
                             value={formData.entryDate}
@@ -339,25 +669,30 @@ export default function ResumeBuilder() {
                       </div>
                     </div>
 
-                    <div className="border-t pt-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label>النبذة الشخصية</Label>
+                    {/* Summary */}
+                    <div className="border-t pt-4 mt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label>{t.summary}</Label>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="gap-1"
                           onClick={handleSuggestSummary}
                           disabled={suggestSummaryMutation.isPending}
-                          className="gap-1"
                         >
-                          <Sparkles className="h-3 w-3" />
-                          {suggestSummaryMutation.isPending ? "جاري الإنشاء..." : "اقتراح بالذكاء الاصطناعي"}
+                          {suggestSummaryMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-4 w-4" />
+                          )}
+                          {t.suggestWithAI}
                         </Button>
                       </div>
                       <Textarea
                         value={formData.summary}
                         onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                        placeholder={language === "ar" ? "اكتب نبذة مختصرة عن نفسك وخبراتك..." : "Write a brief summary about yourself..."}
                         rows={4}
+                        className="resize-none"
                       />
                     </div>
                   </CardContent>
@@ -371,98 +706,93 @@ export default function ResumeBuilder() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Briefcase className="h-5 w-5" />
-                        الخبرات العملية
+                        {t.workExperience}
                       </CardTitle>
                       <Button variant="outline" size="sm" onClick={addExperience} className="gap-1">
                         <Plus className="h-4 w-4" />
-                        إضافة
+                        {t.addExperience}
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {experience.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">
-                        لم تتم إضافة خبرات بعد
-                      </p>
+                      <p className="text-muted-foreground text-center py-8">{t.noExperience}</p>
                     ) : (
                       experience.map((exp, index) => (
-                        <div key={index} className="p-4 rounded-lg bg-muted/50 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium">خبرة #{index + 1}</span>
+                        <div key={index} className="border rounded-lg p-4 space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div className="grid grid-cols-2 gap-3 flex-1">
+                              <div className="space-y-1">
+                                <Label className="text-xs">{t.jobTitle}</Label>
+                                <Input
+                                  value={exp.title}
+                                  onChange={(e) => {
+                                    const updated = [...experience];
+                                    updated[index].title = e.target.value;
+                                    setExperience(updated);
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">{t.company}</Label>
+                                <Input
+                                  value={exp.company}
+                                  onChange={(e) => {
+                                    const updated = [...experience];
+                                    updated[index].company = e.target.value;
+                                    setExperience(updated);
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">{t.startDate}</Label>
+                                <Input
+                                  type="month"
+                                  value={exp.startDate}
+                                  onChange={(e) => {
+                                    const updated = [...experience];
+                                    updated[index].startDate = e.target.value;
+                                    setExperience(updated);
+                                  }}
+                                  dir="ltr"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">{t.endDate}</Label>
+                                <Input
+                                  type="month"
+                                  value={exp.endDate || ""}
+                                  onChange={(e) => {
+                                    const updated = [...experience];
+                                    updated[index].endDate = e.target.value;
+                                    setExperience(updated);
+                                  }}
+                                  disabled={exp.current}
+                                  dir="ltr"
+                                />
+                              </div>
+                            </div>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-destructive"
+                              className="text-destructive"
                               onClick={() => setExperience(experience.filter((_, i) => i !== index))}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <Label className="text-xs">المسمى الوظيفي</Label>
-                              <Input
-                                value={exp.title}
-                                onChange={(e) => {
-                                  const updated = [...experience];
-                                  updated[index].title = e.target.value;
-                                  setExperience(updated);
-                                }}
-                                placeholder="طبيب عام"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">جهة العمل</Label>
-                              <Input
-                                value={exp.company}
-                                onChange={(e) => {
-                                  const updated = [...experience];
-                                  updated[index].company = e.target.value;
-                                  setExperience(updated);
-                                }}
-                                placeholder="مستشفى الملك فهد"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">تاريخ البدء</Label>
-                              <Input
-                                type="month"
-                                value={exp.startDate}
-                                onChange={(e) => {
-                                  const updated = [...experience];
-                                  updated[index].startDate = e.target.value;
-                                  setExperience(updated);
-                                }}
-                                dir="ltr"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <Label className="text-xs">تاريخ الانتهاء</Label>
-                              <Input
-                                type="month"
-                                value={exp.endDate || ""}
-                                onChange={(e) => {
-                                  const updated = [...experience];
-                                  updated[index].endDate = e.target.value;
-                                  setExperience(updated);
-                                }}
-                                dir="ltr"
-                                placeholder="حتى الآن"
-                              />
-                            </div>
-                            <div className="col-span-2 space-y-1">
-                              <Label className="text-xs">الوصف</Label>
-                              <Textarea
-                                value={exp.description || ""}
-                                onChange={(e) => {
-                                  const updated = [...experience];
-                                  updated[index].description = e.target.value;
-                                  setExperience(updated);
-                                }}
-                                rows={2}
-                                placeholder="وصف المهام والإنجازات..."
-                              />
-                            </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">{t.description}</Label>
+                            <Textarea
+                              value={exp.description || ""}
+                              onChange={(e) => {
+                                const updated = [...experience];
+                                updated[index].description = e.target.value;
+                                setExperience(updated);
+                              }}
+                              rows={2}
+                              className="resize-none"
+                            />
                           </div>
                         </div>
                       ))
@@ -478,125 +808,129 @@ export default function ResumeBuilder() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
                         <GraduationCap className="h-5 w-5" />
-                        التعليم والدورات
+                        {t.educationTitle}
                       </CardTitle>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={addEducation} className="gap-1">
-                          <Plus className="h-4 w-4" />
-                          تعليم
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={addCourse} className="gap-1">
-                          <Plus className="h-4 w-4" />
-                          دورة
-                        </Button>
-                      </div>
+                      <Button variant="outline" size="sm" onClick={addEducation} className="gap-1">
+                        <Plus className="h-4 w-4" />
+                        {t.addEducation}
+                      </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Education */}
-                    <div className="space-y-3">
-                      <h4 className="font-medium">التعليم</h4>
-                      {education.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-4 text-sm">
-                          لم يتم إضافة مؤهلات تعليمية
-                        </p>
-                      ) : (
-                        education.map((edu, index) => (
-                          <div key={index} className="p-3 rounded-lg bg-muted/50 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">مؤهل #{index + 1}</span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive"
-                                onClick={() => setEducation(education.filter((_, i) => i !== index))}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
+                  <CardContent className="space-y-4">
+                    {education.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">{t.noEducation}</p>
+                    ) : (
+                      education.map((edu, index) => (
+                        <div key={index} className="border rounded-lg p-4 space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div className="grid grid-cols-3 gap-3 flex-1">
+                              <div className="space-y-1">
+                                <Label className="text-xs">{t.degree}</Label>
+                                <Input
+                                  value={edu.degree}
+                                  onChange={(e) => {
+                                    const updated = [...education];
+                                    updated[index].degree = e.target.value;
+                                    setEducation(updated);
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">{t.institution}</Label>
+                                <Input
+                                  value={edu.institution}
+                                  onChange={(e) => {
+                                    const updated = [...education];
+                                    updated[index].institution = e.target.value;
+                                    setEducation(updated);
+                                  }}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">{t.year}</Label>
+                                <Input
+                                  value={edu.year}
+                                  onChange={(e) => {
+                                    const updated = [...education];
+                                    updated[index].year = e.target.value;
+                                    setEducation(updated);
+                                  }}
+                                  dir="ltr"
+                                />
+                              </div>
                             </div>
-                            <div className="grid grid-cols-3 gap-2">
-                              <Input
-                                value={edu.degree}
-                                onChange={(e) => {
-                                  const updated = [...education];
-                                  updated[index].degree = e.target.value;
-                                  setEducation(updated);
-                                }}
-                                placeholder="الدرجة العلمية"
-                              />
-                              <Input
-                                value={edu.institution}
-                                onChange={(e) => {
-                                  const updated = [...education];
-                                  updated[index].institution = e.target.value;
-                                  setEducation(updated);
-                                }}
-                                placeholder="الجامعة/المعهد"
-                              />
-                              <Input
-                                value={edu.year}
-                                onChange={(e) => {
-                                  const updated = [...education];
-                                  updated[index].year = e.target.value;
-                                  setEducation(updated);
-                                }}
-                                placeholder="السنة"
-                              />
-                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive"
+                              onClick={() => setEducation(education.filter((_, i) => i !== index))}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
-                        ))
-                      )}
-                    </div>
+                        </div>
+                      ))
+                    )}
 
-                    {/* Courses */}
-                    <div className="space-y-3 border-t pt-4">
-                      <h4 className="font-medium">الدورات التدريبية</h4>
+                    {/* Courses Section */}
+                    <div className="border-t pt-4 mt-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">{t.coursesTitle}</h4>
+                        <Button variant="outline" size="sm" onClick={addCourse} className="gap-1">
+                          <Plus className="h-4 w-4" />
+                          {t.addCourse}
+                        </Button>
+                      </div>
                       {courses.length === 0 ? (
-                        <p className="text-center text-muted-foreground py-4 text-sm">
-                          لم يتم إضافة دورات
-                        </p>
+                        <p className="text-muted-foreground text-center py-4">{t.noCourses}</p>
                       ) : (
                         courses.map((course, index) => (
-                          <div key={index} className="p-3 rounded-lg bg-muted/50 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">دورة #{index + 1}</span>
+                          <div key={index} className="border rounded-lg p-3 mb-2">
+                            <div className="flex justify-between items-start">
+                              <div className="grid grid-cols-3 gap-2 flex-1">
+                                <div className="space-y-1">
+                                  <Label className="text-xs">{t.courseName}</Label>
+                                  <Input
+                                    value={course.name}
+                                    onChange={(e) => {
+                                      const updated = [...courses];
+                                      updated[index].name = e.target.value;
+                                      setCourses(updated);
+                                    }}
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs">{t.institution}</Label>
+                                  <Input
+                                    value={course.institution}
+                                    onChange={(e) => {
+                                      const updated = [...courses];
+                                      updated[index].institution = e.target.value;
+                                      setCourses(updated);
+                                    }}
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-xs">{t.year}</Label>
+                                  <Input
+                                    value={course.year}
+                                    onChange={(e) => {
+                                      const updated = [...courses];
+                                      updated[index].year = e.target.value;
+                                      setCourses(updated);
+                                    }}
+                                    dir="ltr"
+                                  />
+                                </div>
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-destructive"
+                                className="text-destructive"
                                 onClick={() => setCourses(courses.filter((_, i) => i !== index))}
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
-                            </div>
-                            <div className="grid grid-cols-3 gap-2">
-                              <Input
-                                value={course.name}
-                                onChange={(e) => {
-                                  const updated = [...courses];
-                                  updated[index].name = e.target.value;
-                                  setCourses(updated);
-                                }}
-                                placeholder="اسم الدورة"
-                              />
-                              <Input
-                                value={course.institution}
-                                onChange={(e) => {
-                                  const updated = [...courses];
-                                  updated[index].institution = e.target.value;
-                                  setCourses(updated);
-                                }}
-                                placeholder="الجهة المانحة"
-                              />
-                              <Input
-                                value={course.year}
-                                onChange={(e) => {
-                                  const updated = [...courses];
-                                  updated[index].year = e.target.value;
-                                  setCourses(updated);
-                                }}
-                                placeholder="السنة"
-                              />
                             </div>
                           </div>
                         ))
@@ -613,17 +947,21 @@ export default function ResumeBuilder() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Award className="h-5 w-5" />
-                        المهارات
+                        {t.skillsTitle}
                       </CardTitle>
                       <Button
                         variant="outline"
                         size="sm"
+                        className="gap-1"
                         onClick={handleSuggestSkills}
                         disabled={suggestSkillsMutation.isPending}
-                        className="gap-1"
                       >
-                        <Sparkles className="h-3 w-3" />
-                        {suggestSkillsMutation.isPending ? "جاري..." : "اقتراح مهارات"}
+                        {suggestSkillsMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Sparkles className="h-4 w-4" />
+                        )}
+                        {t.suggestSkills}
                       </Button>
                     </div>
                   </CardHeader>
@@ -632,32 +970,34 @@ export default function ResumeBuilder() {
                       <Input
                         value={newSkill}
                         onChange={(e) => setNewSkill(e.target.value)}
-                        placeholder="أضف مهارة جديدة..."
+                        placeholder={t.addSkill}
                         onKeyDown={(e) => e.key === "Enter" && addSkill()}
                       />
-                      <Button onClick={addSkill}>
+                      <Button onClick={addSkill} className="gap-1">
                         <Plus className="h-4 w-4" />
+                        {t.addSkill}
                       </Button>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {skills.map((skill, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm"
-                        >
-                          {skill}
-                          <button
-                            onClick={() => setSkills(skills.filter((_, i) => i !== index))}
-                            className="hover:text-destructive"
+                    {skills.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">{t.noSkills}</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {skills.map((skill, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary"
                           >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                      {skills.length === 0 && (
-                        <p className="text-muted-foreground text-sm">لم تتم إضافة مهارات بعد</p>
-                      )}
-                    </div>
+                            <span>{skill}</span>
+                            <button
+                              onClick={() => setSkills(skills.filter((_, i) => i !== index))}
+                              className="hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -669,56 +1009,54 @@ export default function ResumeBuilder() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Languages className="h-5 w-5" />
-                        اللغات
+                        {t.languagesTitle}
                       </CardTitle>
                       <Button variant="outline" size="sm" onClick={addLanguage} className="gap-1">
                         <Plus className="h-4 w-4" />
-                        إضافة
+                        {t.addLanguage}
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    {languages.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">
-                        لم تتم إضافة لغات بعد
-                      </p>
+                  <CardContent className="space-y-4">
+                    {languagesList.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">{t.noLanguages}</p>
                     ) : (
-                      languages.map((lang, index) => (
+                      languagesList.map((lang, index) => (
                         <div key={index} className="flex items-center gap-3">
                           <Input
                             value={lang.language}
                             onChange={(e) => {
-                              const updated = [...languages];
+                              const updated = [...languagesList];
                               updated[index].language = e.target.value;
-                              setLanguages(updated);
+                              setLanguagesList(updated);
                             }}
-                            placeholder="اللغة"
+                            placeholder={t.language}
                             className="flex-1"
                           />
                           <Select
                             value={lang.level}
                             onValueChange={(value) => {
-                              const updated = [...languages];
+                              const updated = [...languagesList];
                               updated[index].level = value;
-                              setLanguages(updated);
+                              setLanguagesList(updated);
                             }}
                           >
                             <SelectTrigger className="w-32">
-                              <SelectValue placeholder="المستوى" />
+                              <SelectValue placeholder={t.level} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="native">لغة أم</SelectItem>
-                              <SelectItem value="fluent">طلاقة</SelectItem>
-                              <SelectItem value="advanced">متقدم</SelectItem>
-                              <SelectItem value="intermediate">متوسط</SelectItem>
-                              <SelectItem value="basic">مبتدئ</SelectItem>
+                              <SelectItem value="native">{t.native}</SelectItem>
+                              <SelectItem value="fluent">{t.fluent}</SelectItem>
+                              <SelectItem value="advanced">{t.advanced}</SelectItem>
+                              <SelectItem value="intermediate">{t.intermediate}</SelectItem>
+                              <SelectItem value="basic">{t.basic}</SelectItem>
                             </SelectContent>
                           </Select>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="text-destructive"
-                            onClick={() => setLanguages(languages.filter((_, i) => i !== index))}
+                            onClick={() => setLanguagesList(languagesList.filter((_, i) => i !== index))}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -735,7 +1073,7 @@ export default function ResumeBuilder() {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Palette className="h-5 w-5" />
-                      تنسيق السيرة الذاتية
+                      {t.styleTitle}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -743,11 +1081,11 @@ export default function ResumeBuilder() {
                     <div className="space-y-3">
                       <h4 className="font-medium flex items-center gap-2">
                         <Type className="h-4 w-4" />
-                        العناوين الرئيسية
+                        {t.mainHeadings}
                       </h4>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="space-y-1">
-                          <Label className="text-xs">الخط</Label>
+                          <Label className="text-xs">{t.font}</Label>
                           <Select
                             value={styles.headingFont}
                             onValueChange={(v) => setStyles({ ...styles, headingFont: v })}
@@ -758,14 +1096,14 @@ export default function ResumeBuilder() {
                             <SelectContent>
                               {fonts.map((font) => (
                                 <SelectItem key={font.value} value={font.value}>
-                                  {font.label}
+                                  {language === "ar" ? font.label : font.labelEn}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">الحجم</Label>
+                          <Label className="text-xs">{t.size}</Label>
                           <Select
                             value={styles.headingSize.toString()}
                             onValueChange={(v) => setStyles({ ...styles, headingSize: parseInt(v) })}
@@ -783,8 +1121,8 @@ export default function ResumeBuilder() {
                           </Select>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">اللون</Label>
-                          <div className="flex gap-1">
+                          <Label className="text-xs">{t.color}</Label>
+                          <div className="flex gap-1 flex-wrap">
                             {defaultColors.map((color) => (
                               <button
                                 key={color}
@@ -804,11 +1142,11 @@ export default function ResumeBuilder() {
                     <div className="space-y-3 border-t pt-4">
                       <h4 className="font-medium flex items-center gap-2">
                         <FileText className="h-4 w-4" />
-                        النص الأساسي
+                        {t.bodyText}
                       </h4>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="space-y-1">
-                          <Label className="text-xs">الخط</Label>
+                          <Label className="text-xs">{t.font}</Label>
                           <Select
                             value={styles.bodyFont}
                             onValueChange={(v) => setStyles({ ...styles, bodyFont: v })}
@@ -819,14 +1157,14 @@ export default function ResumeBuilder() {
                             <SelectContent>
                               {fonts.map((font) => (
                                 <SelectItem key={font.value} value={font.value}>
-                                  {font.label}
+                                  {language === "ar" ? font.label : font.labelEn}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">الحجم</Label>
+                          <Label className="text-xs">{t.size}</Label>
                           <Select
                             value={styles.bodySize.toString()}
                             onValueChange={(v) => setStyles({ ...styles, bodySize: parseInt(v) })}
@@ -844,8 +1182,8 @@ export default function ResumeBuilder() {
                           </Select>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">اللون</Label>
-                          <div className="flex gap-1">
+                          <Label className="text-xs">{t.color}</Label>
+                          <div className="flex gap-1 flex-wrap">
                             {defaultColors.map((color) => (
                               <button
                                 key={color}
@@ -873,62 +1211,106 @@ export default function ResumeBuilder() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Eye className="h-5 w-5" />
-                    المعاينة
+                    {t.preview}
                   </CardTitle>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <Download className="h-4 w-4" />
-                    تحميل PDF
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={handleDownloadImage}
+                      disabled={isDownloading}
+                    >
+                      {isDownloading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Image className="h-4 w-4" />
+                      )}
+                      {t.downloadImage}
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="gap-1"
+                      onClick={handleDownloadPDF}
+                      disabled={isDownloading}
+                    >
+                      {isDownloading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
+                      {t.downloadPDF}
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0 overflow-auto h-[calc(100%-4rem)]">
                 <div
                   ref={previewRef}
-                  className="bg-white min-h-full"
-                  style={{ direction: isRTL ? "rtl" : "ltr" }}
+                  className="bg-white"
+                  style={{ 
+                    direction: isRTL ? "rtl" : "ltr",
+                    width: "210mm",
+                    minHeight: "297mm",
+                    margin: "0 auto",
+                  }}
                 >
                   {/* Resume Preview - 1/3 + 2/3 Layout */}
-                  <div className="flex min-h-[842px]">
+                  <div className="flex" style={{ minHeight: "297mm" }}>
                     {/* Sidebar - 1/3 */}
                     <div
-                      className="w-1/3 p-6"
-                      style={{ backgroundColor: styles.headingColor + "15" }}
+                      className="p-4 overflow-hidden"
+                      style={{ 
+                        backgroundColor: styles.headingColor + "15",
+                        width: "33.33%",
+                        flexShrink: 0,
+                      }}
                     >
                       {/* Photo */}
                       {formData.photoUrl && (
-                        <div className="mb-6">
+                        <div className="mb-4 flex justify-center">
                           <img
                             src={formData.photoUrl}
                             alt="Profile"
-                            className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg"
+                            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                           />
                         </div>
                       )}
 
                       {/* Contact Info */}
-                      <div className="space-y-4 mb-6">
+                      <div className="space-y-2 mb-4">
                         <h3
                           style={{
                             fontFamily: styles.headingFont,
-                            fontSize: `${styles.headingSize - 4}px`,
+                            fontSize: `${styles.headingSize - 2}px`,
                             color: styles.headingColor,
                           }}
-                          className="font-bold border-b pb-2"
+                          className="font-bold border-b pb-1"
                         >
-                          {language === "ar" ? "معلومات التواصل" : "Contact"}
+                          {t.contactInfo}
                         </h3>
                         {formData.phone && (
-                          <p style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}>
+                          <p 
+                            className="break-words text-xs"
+                            style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}
+                          >
                             {formData.phone}
                           </p>
                         )}
                         {formData.email && (
-                          <p style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}>
+                          <p 
+                            className="break-all text-xs"
+                            style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}
+                          >
                             {formData.email}
                           </p>
                         )}
                         {formData.address && (
-                          <p style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}>
+                          <p 
+                            className="break-words text-xs"
+                            style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}
+                          >
                             {formData.address}
                           </p>
                         )}
@@ -936,30 +1318,39 @@ export default function ResumeBuilder() {
 
                       {/* Professional Info */}
                       {(formData.mumaresNumber || formData.dataflowNumber || formData.iqamaNumber) && (
-                        <div className="space-y-3 mb-6">
+                        <div className="space-y-2 mb-4">
                           <h3
                             style={{
                               fontFamily: styles.headingFont,
-                              fontSize: `${styles.headingSize - 4}px`,
+                              fontSize: `${styles.headingSize - 2}px`,
                               color: styles.headingColor,
                             }}
-                            className="font-bold border-b pb-2"
+                            className="font-bold border-b pb-1"
                           >
-                            {language === "ar" ? "بيانات مهنية" : "Professional Info"}
+                            {t.professionalData}
                           </h3>
                           {formData.mumaresNumber && (
-                            <p style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}>
-                              <span className="font-medium">ممارس:</span> {formData.mumaresNumber}
+                            <p 
+                              className="text-xs"
+                              style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}
+                            >
+                              <span className="font-medium">{language === "ar" ? "ممارس:" : "Mumares:"}</span> {formData.mumaresNumber}
                             </p>
                           )}
                           {formData.dataflowNumber && (
-                            <p style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}>
+                            <p 
+                              className="text-xs"
+                              style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}
+                            >
                               <span className="font-medium">Dataflow:</span> {formData.dataflowNumber}
                             </p>
                           )}
                           {formData.iqamaNumber && (
-                            <p style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}>
-                              <span className="font-medium">الإقامة:</span> {formData.iqamaNumber}
+                            <p 
+                              className="text-xs"
+                              style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}
+                            >
+                              <span className="font-medium">{language === "ar" ? "الإقامة:" : "Iqama:"}</span> {formData.iqamaNumber}
                             </p>
                           )}
                         </div>
@@ -967,16 +1358,16 @@ export default function ResumeBuilder() {
 
                       {/* Skills */}
                       {skills.length > 0 && (
-                        <div className="space-y-3 mb-6">
+                        <div className="space-y-2 mb-4">
                           <h3
                             style={{
                               fontFamily: styles.headingFont,
-                              fontSize: `${styles.headingSize - 4}px`,
+                              fontSize: `${styles.headingSize - 2}px`,
                               color: styles.headingColor,
                             }}
-                            className="font-bold border-b pb-2"
+                            className="font-bold border-b pb-1"
                           >
-                            {language === "ar" ? "المهارات" : "Skills"}
+                            {t.skillsTitle}
                           </h3>
                           <div className="flex flex-wrap gap-1">
                             {skills.map((skill, i) => (
@@ -987,6 +1378,7 @@ export default function ResumeBuilder() {
                                   backgroundColor: styles.headingColor + "20",
                                   color: styles.headingColor,
                                   fontFamily: styles.bodyFont,
+                                  fontSize: `${styles.bodySize - 1}px`,
                                 }}
                               >
                                 {skill}
@@ -997,24 +1389,25 @@ export default function ResumeBuilder() {
                       )}
 
                       {/* Languages */}
-                      {languages.length > 0 && (
-                        <div className="space-y-3">
+                      {languagesList.length > 0 && (
+                        <div className="space-y-2">
                           <h3
                             style={{
                               fontFamily: styles.headingFont,
-                              fontSize: `${styles.headingSize - 4}px`,
+                              fontSize: `${styles.headingSize - 2}px`,
                               color: styles.headingColor,
                             }}
-                            className="font-bold border-b pb-2"
+                            className="font-bold border-b pb-1"
                           >
-                            {language === "ar" ? "اللغات" : "Languages"}
+                            {t.languagesTitle}
                           </h3>
-                          {languages.map((lang, i) => (
+                          {languagesList.map((lang, i) => (
                             <p
                               key={i}
+                              className="text-xs"
                               style={{ fontFamily: styles.bodyFont, fontSize: `${styles.bodySize}px`, color: styles.bodyColor }}
                             >
-                              {lang.language} - {lang.level === "native" ? "لغة أم" : lang.level === "fluent" ? "طلاقة" : lang.level === "advanced" ? "متقدم" : lang.level === "intermediate" ? "متوسط" : "مبتدئ"}
+                              {lang.language} - {getLevelText(lang.level)}
                             </p>
                           ))}
                         </div>
@@ -1022,18 +1415,18 @@ export default function ResumeBuilder() {
                     </div>
 
                     {/* Main Content - 2/3 */}
-                    <div className="w-2/3 p-6">
+                    <div className="p-4" style={{ width: "66.67%" }}>
                       {/* Name & Title */}
-                      <div className="mb-6 pb-4 border-b">
+                      <div className="mb-4 pb-3 border-b">
                         <h1
                           style={{
                             fontFamily: styles.headingFont,
-                            fontSize: `${styles.headingSize + 8}px`,
+                            fontSize: `${styles.headingSize + 6}px`,
                             color: styles.headingColor,
                           }}
                           className="font-bold"
                         >
-                          {formData.fullName || (language === "ar" ? "الاسم الكامل" : "Full Name")}
+                          {formData.fullName || t.placeholderName}
                         </h1>
                         {experience[0]?.title && (
                           <p
@@ -1051,7 +1444,7 @@ export default function ResumeBuilder() {
 
                       {/* Summary */}
                       {formData.summary && (
-                        <div className="mb-6">
+                        <div className="mb-4">
                           <h2
                             style={{
                               fontFamily: styles.headingFont,
@@ -1060,14 +1453,14 @@ export default function ResumeBuilder() {
                             }}
                             className="font-bold mb-2"
                           >
-                            {language === "ar" ? "نبذة شخصية" : "Summary"}
+                            {t.summary}
                           </h2>
                           <p
                             style={{
                               fontFamily: styles.bodyFont,
                               fontSize: `${styles.bodySize}px`,
                               color: styles.bodyColor,
-                              lineHeight: 1.6,
+                              lineHeight: 1.5,
                             }}
                           >
                             {formData.summary}
@@ -1077,18 +1470,18 @@ export default function ResumeBuilder() {
 
                       {/* Experience */}
                       {experience.length > 0 && (
-                        <div className="mb-6">
+                        <div className="mb-4">
                           <h2
                             style={{
                               fontFamily: styles.headingFont,
                               fontSize: `${styles.headingSize}px`,
                               color: styles.headingColor,
                             }}
-                            className="font-bold mb-3"
+                            className="font-bold mb-2"
                           >
-                            {language === "ar" ? "الخبرات العملية" : "Experience"}
+                            {t.workExperience}
                           </h2>
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             {experience.map((exp, i) => (
                               <div key={i}>
                                 <div className="flex justify-between items-start">
@@ -1116,11 +1509,11 @@ export default function ResumeBuilder() {
                                   <span
                                     style={{
                                       fontFamily: styles.bodyFont,
-                                      fontSize: `${styles.bodySize - 2}px`,
+                                      fontSize: `${styles.bodySize - 1}px`,
                                       color: styles.bodyColor,
                                     }}
                                   >
-                                    {exp.startDate} - {exp.endDate || (language === "ar" ? "حتى الآن" : "Present")}
+                                    {exp.startDate} - {exp.endDate || t.present}
                                   </span>
                                 </div>
                                 {exp.description && (
@@ -1129,7 +1522,7 @@ export default function ResumeBuilder() {
                                       fontFamily: styles.bodyFont,
                                       fontSize: `${styles.bodySize}px`,
                                       color: styles.bodyColor,
-                                      lineHeight: 1.5,
+                                      lineHeight: 1.4,
                                     }}
                                     className="mt-1"
                                   >
@@ -1144,18 +1537,18 @@ export default function ResumeBuilder() {
 
                       {/* Education */}
                       {education.length > 0 && (
-                        <div className="mb-6">
+                        <div className="mb-4">
                           <h2
                             style={{
                               fontFamily: styles.headingFont,
                               fontSize: `${styles.headingSize}px`,
                               color: styles.headingColor,
                             }}
-                            className="font-bold mb-3"
+                            className="font-bold mb-2"
                           >
-                            {language === "ar" ? "التعليم" : "Education"}
+                            {t.educationTitle}
                           </h2>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {education.map((edu, i) => (
                               <div key={i} className="flex justify-between">
                                 <div>
@@ -1182,7 +1575,7 @@ export default function ResumeBuilder() {
                                 <span
                                   style={{
                                     fontFamily: styles.bodyFont,
-                                    fontSize: `${styles.bodySize - 2}px`,
+                                    fontSize: `${styles.bodySize - 1}px`,
                                     color: styles.bodyColor,
                                   }}
                                 >
@@ -1203,11 +1596,11 @@ export default function ResumeBuilder() {
                               fontSize: `${styles.headingSize}px`,
                               color: styles.headingColor,
                             }}
-                            className="font-bold mb-3"
+                            className="font-bold mb-2"
                           >
-                            {language === "ar" ? "الدورات التدريبية" : "Courses"}
+                            {t.coursesTitle}
                           </h2>
-                          <div className="space-y-2">
+                          <div className="space-y-1">
                             {courses.map((course, i) => (
                               <div key={i} className="flex justify-between">
                                 <div>
@@ -1234,7 +1627,7 @@ export default function ResumeBuilder() {
                                 <span
                                   style={{
                                     fontFamily: styles.bodyFont,
-                                    fontSize: `${styles.bodySize - 2}px`,
+                                    fontSize: `${styles.bodySize - 1}px`,
                                     color: styles.bodyColor,
                                   }}
                                 >

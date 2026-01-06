@@ -7,6 +7,8 @@ import { TRPCError } from "@trpc/server";
 import * as db from "./db";
 import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
+import { runJobSearchCycle, searchForNewJobs, addJobsToDatabase, deleteExpiredJobs } from "./jobSearchService";
+import { sendWhatsAppNotification, getWhatsAppLink } from "./whatsappService";
 
 // Admin procedure - only allows admin users
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -286,7 +288,7 @@ export const appRouter = router({
         // Update application with matched jobs
         await db.updateApplicationStatus(id, 'processing', matchedJobIds);
         
-        // Notify owner
+        // Notify owner via system notification
         const jobsList = matchingJobs.map((j, i) => `${i + 1}. ${j.title} - ${j.city}`).join('\n');
         await notifyOwner({
           title: `طلب توظيف جديد: ${applicationNumber}`,
@@ -302,8 +304,27 @@ export const appRouter = router({
 ${jobsList || 'لا توجد وظائف مطابقة حالياً'}
           `.trim(),
         });
+
+        // Prepare WhatsApp notification
+        const whatsappNotification = await sendWhatsAppNotification({
+          applicationNumber,
+          fullName: input.email.split('@')[0], // استخدام البريد كاسم مؤقت
+          city: input.city,
+          jobTitle: input.jobTitle,
+          phone: input.phone,
+          email: input.email,
+          matchingJobs: matchingJobs.map(j => ({
+            title: j.title,
+            facility: 'غير محدد',
+            city: j.city
+          }))
+        });
         
-        return { applicationNumber, matchedJobsCount: matchedJobIds.length };
+        return { 
+          applicationNumber, 
+          matchedJobsCount: matchedJobIds.length,
+          whatsappLink: whatsappNotification.whatsappLink
+        };
       }),
     
     updateStatus: adminProcedure
@@ -478,6 +499,27 @@ ${jobsList || 'لا توجد وظائف مطابقة حالياً'}
         
         return { skills };
       }),
+  }),
+
+  // Job Search Service (Admin only)
+  jobSearch: router({
+    // تشغيل دورة البحث الكاملة
+    runCycle: adminProcedure.mutation(async () => {
+      const result = await runJobSearchCycle();
+      return result;
+    }),
+
+    // البحث عن وظائف جديدة فقط
+    search: adminProcedure.mutation(async () => {
+      const jobs = await searchForNewJobs();
+      return { jobs, count: jobs.length };
+    }),
+
+    // حذف الوظائف المنتهية
+    deleteExpired: adminProcedure.mutation(async () => {
+      const deleted = await deleteExpiredJobs();
+      return { deleted };
+    }),
   }),
 });
 

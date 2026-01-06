@@ -1,0 +1,50 @@
+{
+  "query": "SELECT COUNT(*) as total, city FROM medical_facilities GROUP BY city ORDER BY total DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2HEwJL11c9zbWkb.root --database FmQ5sTfpFg2sR8fN5bhgCC --execute SELECT COUNT(*) as total, city FROM medical_facilities GROUP BY city ORDER BY total DESC",
+  "rows": [
+    {
+      "total": "54",
+      "city": "الرياض"
+    },
+    {
+      "total": "28",
+      "city": "جدة"
+    },
+    {
+      "total": "12",
+      "city": "الخبر"
+    },
+    {
+      "total": "9",
+      "city": "الدمام"
+    },
+    {
+      "total": "4",
+      "city": "مكة المكرمة"
+    },
+    {
+      "total": "4",
+      "city": "الظهران"
+    },
+    {
+      "total": "3",
+      "city": "الجبيل"
+    },
+    {
+      "total": "3",
+      "city": "القطيف"
+    },
+    {
+      "total": "3",
+      "city": "الهفوف"
+    },
+    {
+      "total": "1",
+      "city": "المدينة المنورة"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\tcity\n54\tالرياض\n28\tجدة\n12\tالخبر\n9\tالدمام\n4\tمكة المكرمة\n4\tالظهران\n3\tالجبيل\n3\tالقطيف\n3\tالهفوف\n1\tالمدينة المنورة\n",
+  "stderr": "",
+  "execution_time_ms": 1590
+}

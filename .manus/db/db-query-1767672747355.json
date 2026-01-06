@@ -1,0 +1,40 @@
+{
+  "query": "SELECT DISTINCT city FROM medical_facilities ORDER BY city;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2HEwJL11c9zbWkb.root --database FmQ5sTfpFg2sR8fN5bhgCC --execute SELECT DISTINCT city FROM medical_facilities ORDER BY city;",
+  "rows": [
+    {
+      "city": "الجبيل"
+    },
+    {
+      "city": "الخبر"
+    },
+    {
+      "city": "الدمام"
+    },
+    {
+      "city": "الرياض"
+    },
+    {
+      "city": "الظهران"
+    },
+    {
+      "city": "القطيف"
+    },
+    {
+      "city": "المدينة المنورة"
+    },
+    {
+      "city": "الهفوف"
+    },
+    {
+      "city": "جدة"
+    },
+    {
+      "city": "مكة المكرمة"
+    }
+  ],
+  "messages": [],
+  "stdout": "city\nالجبيل\nالخبر\nالدمام\nالرياض\nالظهران\nالقطيف\nالمدينة المنورة\nالهفوف\nجدة\nمكة المكرمة\n",
+  "stderr": "",
+  "execution_time_ms": 1500
+}
